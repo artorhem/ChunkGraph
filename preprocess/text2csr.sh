@@ -1,6 +1,7 @@
 #!/bin/bash
-
+set -e
 echo 'Input: [preprocess_path]/text2csr.sh [dataset_path] [dataset_name]'
+echo 'example: bash preprocess/text2csr.sh ~/LiveJournal livejournal'
 
 if [ ! $# -eq 2 ];
 then
@@ -32,11 +33,12 @@ bash preprocess/split.sh $dataset_path/txt/${dataset_name}.txt $dataset_path/mul
 
 # convert to binary format
 cd ${base}/preprocess/text2bin && make
-./text2bin.bin ${base}/$dataset_path/multi/${dataset_name} $(($file_count+1)) 16 1
+#Input: ./exe fileprefix num_files numthreads rm_text_file (1 yes, 2 no)
+./text2bin.bin $dataset_path/multi/${dataset_name} $(($file_count+1)) 16 1
 
 # convert to csr format
 cd ${base}/preprocess/bin2csr && make
-./bin2csr.bin ${base}/$dataset_path/multi/${dataset_name} $(($file_count+1)) 1 1 16
+./bin2csr.bin $dataset_path/multi/${dataset_name} $(($file_count+1)) 1 1 16
 
 # remove the binary files and rename the csr files
 cd ${base} && mkdir -p $dataset_path/csr_bin
@@ -47,4 +49,4 @@ rm -rf $dataset_path/multi
 
 # generate in-csr
 cd ${base}/preprocess/genincsr && make
-./main ${base}/$dataset_path/csr_bin/ ${dataset_name}
+./main $dataset_path/csr_bin/ ${dataset_name}
